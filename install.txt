@@ -1,0 +1,36 @@
+部署说明
+
+1. python、MySQLdb版本和pamc一致
+
+2. 代码配置都在config/global.py中，日志的配置在fileserver/logging.cfg中
+
+3. 数据库配置
+    a. 新建一个数据库，最好是叫fileserver
+    b. 配置数据库
+        FILESERVER_MYSQL_DB_NAME
+        FILESERVER_MYSQL_DB_USER
+        FILESERVER_MYSQL_DB_PWD
+        FILESERVER_MYSQL_DB_HOST
+        FILESERVER_MYSQL_DB_PORT
+    c. 执行python manage.py syncdb 新建数据库的表
+
+4. 配置log，和pamc log配置一样
+
+5. 配置nfs的位置
+    a. nfs的配置为 FILESERVER_SAVE_PATH
+    b. 可以为本地硬盘 可以为nfs
+
+6. 配置文件最大size
+    a. 配置为 MAX_FILE_SIZE 
+    b. 如果是100MB的话 不用配置，默认是100MB
+
+7. 配置允许的文件后缀
+    a. 配置为 ALLOW_FILE_EXTS
+    b. 如果要添加zip的文件 即 ALLOW_FILE_EXTS = ['zip']
+
+8. 配置nginx和uwsgi
+    a. uwsgi配置和pamc一直
+    b. nginx只配置443端口
+    c. 客户端证书在key/server.zip 服务端证书在key/device.zip
+
+9. 查看global是否为False

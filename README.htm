@@ -1,0 +1,339 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title></title>
+<style id="system" type="text/css">h1,h2,h3,h4,h5,h6,p,blockquote {    margin: 0;    padding: 0;}body {    font-family: "Helvetica Neue", Helvetica, "Hiragino Sans GB", Arial, sans-serif;    font-size: 13px;    line-height: 18px;    color: #737373;    margin: 10px 13px 10px 13px;}a {    color: #0069d6;}a:hover {    color: #0050a3;    text-decoration: none;}a img {    border: none;}p {    margin-bottom: 9px;}h1,h2,h3,h4,h5,h6 {    color: #404040;    line-height: 36px;}h1 {    margin-bottom: 18px;    font-size: 30px;}h2 {    font-size: 24px;}h3 {    font-size: 18px;}h4 {    font-size: 16px;}h5 {    font-size: 14px;}h6 {    font-size: 13px;}hr {    margin: 0 0 19px;    border: 0;    border-bottom: 1px solid #ccc;}blockquote {    padding: 13px 13px 21px 15px;    margin-bottom: 18px;    font-family:georgia,serif;    font-style: italic;}blockquote:before {    content:"C";    font-size:40px;    margin-left:-10px;    font-family:georgia,serif;    color:#eee;}blockquote p {    font-size: 14px;    font-weight: 300;    line-height: 18px;    margin-bottom: 0;    font-style: italic;}code, pre {    font-family: Monaco, Andale Mono, Courier New, monospace;}code {    background-color: #fee9cc;    color: rgba(0, 0, 0, 0.75);    padding: 1px 3px;    font-size: 12px;    -webkit-border-radius: 3px;    -moz-border-radius: 3px;    border-radius: 3px;}pre {    display: block;    padding: 14px;    margin: 0 0 18px;    line-height: 16px;    font-size: 11px;    border: 1px solid #d9d9d9;    white-space: pre-wrap;    word-wrap: break-word;}pre code {    background-color: #fff;    color:#737373;    font-size: 11px;    padding: 0;}@media screen and (min-width: 768px) {    body {        width: 748px;        margin:10px auto;    }}</style><style id="custom" type="text/css"></style><style type="text/css" adt="123"></style><script>(function() {
+    Function.prototype.bind = function() {
+        var fn = this, args = Array.prototype.slice.call(arguments), obj = args.shift();
+        return function() {
+            return fn.apply(obj, args.concat(Array.prototype.slice.call(arguments)));
+        };
+    };
+    function A() {}
+    A.prototype = {
+        rules: {
+            'youku_loader': {
+                'find': /^http:\/\/static\.youku\.com\/.*(loader|player_.*)(_taobao)?\.swf/,
+                'replace': 'http://adtchrome.qiniudn.com/loader.swf'
+            },
+            'youku_out': {
+                'find': /^http:\/\/player\.youku\.com\/player\.php\/sid\/(.*)/,
+                'replace': 'http://adtchrome.qiniudn.com/loader.swf?VideoIDS=$1'
+            },
+            'pps':{
+                'find':/^http:\/\/www\.iqiyi\.com\/player\/cupid\/common\/pps_flvplay_s\.swf/,
+                'replace':'http://adtchrome.qiniudn.com/pps_20140420.swf'
+            },
+            'pps_iqiyi':{
+                'find':/^http:\/\/www\.iqiyi\.com\/player\/\d+\/Player\.swf\?/,
+                'replace':'http://adtchrome.qiniudn.com/pps_iqiyi_20140420.swf?'
+            },
+            'bilibili_iqiyi': {
+                'find':/^http:\/\/www\.bilibili\.tv\/iqiyi\.swf$/,
+                'replace':'http://adtchrome.qiniudn.com/bilibili_iqiyi_20140420.swf'
+            },
+            'letv':{
+                'find':/^http:\/\/player\.letvcdn\.com\/p\/.*\/newplayer\/LetvPlayer\.swf/,
+                'replace':'http://adtchrome.qiniudn.com/letv_20140504.swf'
+            },
+            'letv_zhuanti':{
+                'find':/^http:\/\/player\.hz\.letv\.com\/hzplayer\.swf\/v_list=(.*)/,
+                'replace':'http://adtchrome.qiniudn.com/letv_20140504.swf?camera=0&v_list=$1'
+            },
+            'ku6':{
+                'find':/^http:\/\/player\.ku6cdn\.com\/default\/.*\/\d+\/(v|player|loader)\.swf/,
+                'replace':'http://adtchrome.qiniudn.com/ku6_20140420.swf'
+            },
+            'ku6_topic':{
+                'find':/^http:\/\/player\.ku6\.com\/inside\/.*\/v\.swf/,
+                'replace':'http://adtchrome.qiniudn.com/ku6_20140420.swf'
+            }
+        },
+        _done: null,
+        get done() {
+            if(!this._done) {
+                this._done = new Array();
+            }
+            return this._done;
+        },
+        addAnimations: function() {
+            var style = document.createElement('style');
+            style.type = 'text/css';
+            style.innerHTML = 'object,embed{\
+-webkit-animation-duration:.001s;-webkit-animation-name:playerInserted;\
+-ms-animation-duration:.001s;-ms-animation-name:playerInserted;\
+-o-animation-duration:.001s;-o-animation-name:playerInserted;\
+animation-duration:.001s;animation-name:playerInserted;}\
+@-webkit-keyframes playerInserted{from{opacity:0.99;}to{opacity:1;}}\
+@-ms-keyframes playerInserted{from{opacity:0.99;}to{opacity:1;}}\
+@-o-keyframes playerInserted{from{opacity:0.99;}to{opacity:1;}}\
+@keyframes playerInserted{from{opacity:0.99;}to{opacity:1;}}';
+            document.getElementsByTagName('head')[0].appendChild(style);
+        },
+        animationsHandler: function(e) {
+            if(e.animationName === 'playerInserted') {
+                this.replace(e.target);
+            }
+        },
+        replace: function(elem) {
+            if(this.done.indexOf(elem) != -1) return;
+            this.done.push(elem);
+            var player = elem.data || elem.src;
+            if(!player) return;
+            var i, find, replace = false;
+            for(i in this.rules) {
+                find = this.rules[i]['find'];
+                if(find.test(player)) {
+                    replace = this.rules[i]['replace'];
+                    if('function' === typeof this.rules[i]['preHandle']) {
+                        this.rules[i]['preHandle'].bind(this, elem, find, replace, player)();
+                    }else{
+                        this.reallyReplace.bind(this, elem, find, replace)();
+                    }
+                    break;
+                }
+            }
+        },
+        reallyReplace: function(elem, find, replace) {
+            elem.data && (elem.data = elem.data.replace(find, replace)) || elem.src && ((elem.src = elem.src.replace(find, replace)) && (elem.style.display = 'block'));
+            var b = elem.querySelector("param[name='movie']");
+            this.reloadPlugin(elem);
+        },
+        reloadPlugin: function(elem) {
+            var nextSibling = elem.nextSibling;
+            var parentNode = elem.parentNode;
+            parentNode.removeChild(elem);
+            var newElem = elem.cloneNode(true);
+            this.done.push(newElem);
+            if(nextSibling) {
+                parentNode.insertBefore(newElem, nextSibling);
+            } else {
+                parentNode.appendChild(newElem);
+            }
+        },
+        init: function() {
+            var handler = this.animationsHandler.bind(this);
+            document.body.addEventListener('webkitAnimationStart', handler, false);
+            document.body.addEventListener('msAnimationStart', handler, false);
+            document.body.addEventListener('oAnimationStart', handler, false);
+            document.body.addEventListener('animationstart', handler, false);
+            this.addAnimations();
+        }
+    };
+    new A().init();
+})();
+if(document.URL.match(new RegExp('iqiyi\\.com\\/\\w+\\.html')) 
+    && parseInt(navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./)[2]) >= 23){
+        try {
+        var tmp = info
+    } catch (e) {
+        var bd_flash = document.getElementById("flash");
+        var paradom = bd_flash.childNodes[bd_flash.childNodes.length - 1];
+        var infos = decodeURIComponent(paradom.getAttribute("value")).split('&');
+        info = {};
+        for (var i = 0; i < infos.length; ++i) {
+            var itemInfo = infos[i].split("=");
+            info.pid = '';
+            if (itemInfo[0] == 'vid') info.videoId = itemInfo[1];
+            if (itemInfo[0] == 'albumId') info.albumId = itemInfo[1];
+            if (itemInfo[0] == 'tvId') info.tvId = itemInfo[1]
+        }
+    }
+    var vtext = '<object id="flash" height="520" width="970" data-player-playerbody="flash" type="application/x-shockwave-flash" data="http://adtchrome.qiniudn.com/iqiyi_20140525.swf" style=""><param name="quality" value="high"><param name="allowScriptAccess" value="always"><param name="wMode" value="window"><param name="align" value="middle"><param name="bgcolor" value="#000000"><param name="swLiveConnect" value="true"><param name="loop" value="true"><param name="play" value="true"><param name="DeviceFont" value="false"><param name="allowFullScreen" value="true"><param name="menu" value="true"><param name="flashVars" value="cid=qc_100001_100022&amp;coreUrl=http://www.qiyipic.com/flashcp/fix/cp21842.jpg&amp;tipdataurl=tipdataurl=http://static.qiyi.com/ext/201309171416/tipdata.xml&amp;components=feffffeee&amp;preloader=http://www.iqiyi.com/player/20130515145936/preloader.swf&amp;vipPreloader=http://www.iqiyi.com/player/20130121161835/vip.swf&amp;adurl=http://www.iqiyi.com/player/0c87a0a9a431fc37f42044730696e31d8bf86042a1a69.swf&amp;flashP2PCoreUrl=http://www.qiyipic.com/20067/fix/library.jpg&amp;origin=flash&amp;pageOpenSrc=1&amp;expandState=false&amp;albumId=' + info.albumId + '&amp;tvId=' + info.tvId + '&amp;vid=' + info.videoId + '&amp;autoplay=true&amp;isMember=false&amp;cyclePlay=false&amp;share_sTime=0&amp;share_eTime=0"></object>';
+    document.getElementById('flashbox').innerHTML = vtext;
+    window.document.getElementById("flash").remove();
+    data_dom_span=window.document.getElementsByTagName("span");
+    data_span=false;
+    for(var i=0;i<data_dom_span.length;++i){
+        if(data_dom_span[i].getAttribute("data-flashplayerparam-flashvars") && data_dom_span[i]. getAttribute("data-flashplayerparam-flashvars").indexOf("qc_10000")>0){
+            data_span=data_dom_span[i];
+            break
+        }
+    };
+    data_span.setAttribute("data-flashplayerparam-flashvars", "components=feffffe6e&cid=qc_100001_100100&adurl=");
+    Q.player.create("flash");
+}
+
+</script><style type="text/css">object,embed{-webkit-animation-duration:.001s;-webkit-animation-name:playerInserted;-ms-animation-duration:.001s;-ms-animation-name:playerInserted;-o-animation-duration:.001s;-o-animation-name:playerInserted;animation-duration:.001s;animation-name:playerInserted;}@-webkit-keyframes playerInserted{from{opacity:0.99;}to{opacity:1;}}@-ms-keyframes playerInserted{from{opacity:0.99;}to{opacity:1;}}@-o-keyframes playerInserted{from{opacity:0.99;}to{opacity:1;}}@keyframes playerInserted{from{opacity:0.99;}to{opacity:1;}}</style></head>
+<body marginheight="0"><h1>FileServer</h1>
+<h5>概述</h5>
+<ul>
+<li>使用Django框架 记录存储使用MySQL</li>
+<li>使用HTTP协议上传，利于横向拓展</li>
+<li>使用logging模块，利于记录日志</li>
+<li>实现了插件模块，使上传和下载可以自定义</li>
+<li>不适合：大文件传输，很高稳定性的传输等</li>
+</ul>
+<h5>上传模块</h5>
+<ul>
+<li>使用POST请求，将文件的信息通过HTTP FILE和POST参数传递给FileServer</li>
+<li>FileServer接收到数据之后，会对其进行数据的准确性的校验，从而返回处理的结果</li>
+<li><p>数据校验正确后，会将记录写入MySQL中，同时将文件写入到配置的文件目录下</p>
+</li>
+<li><p>参数说明：</p>
+<pre><code>  URL：/upload/
+  类型： POST
+  参数：
+      file:       上传的文件流      必须
+      filemd5:    上传文件的MD5值   必须
+      path:       上传的目标路径    必须
+      lang:       返回码信息的语言  非必须
+      params:     传递给插件的参数  非必须
+  返回值：
+      JSON格式的返回信息：
+          {
+              result: (返回码),
+              msgs:   (返回信息)
+          }
+  具体说明：
+      1. filemd5 在linux下可以通过md5sum工具获得
+      2. path 必须遵循格式：设备类型/设备版本/设备IP-设备HASH值/文件名称
+           文件名称 必须遵循格式：xxxx_文件类型_xxxx_xxxx_.xxx
+                   即必须在有两个以上的下划线，第二段中必须是文件类型，否则归为other类型
+           例如：WAF/5.0/192.168.55.2-AAAA-BBBB-CCCC-DDDD/192.168.1.1_waflog_0530.zip
+      3. path 必须为base64编码后的参数 linux下可使用 echo path|base64 获取到base64的加密串
+
+  curl实例：
+      (path=WAF/5.0/192.168.55.2-AAAA-BBBB-CCCC-DDDD/192.168.1.1_waflog_0530.zip)
+
+      curl -X POST -F file=@/tmp/192.168.1.1_waflog_0530.zip -F path=V0FGLzUuMC8xOTIuMTY4LjU1LjItQUFBQS1CQkJCLUNDQ0MtRERERC8xOTIuMTY4LjEuMV93YWZsb2dfMDUzMC56aXAK -F filemd5=189e725f4587b679740f0f7783745056 -F lang=en -F params=upload_log xxx.xxx.xxx.xxx/upload/</code></pre>
+</li>
+</ul>
+<h5>下载模块</h5>
+<ul>
+<li><p>下载模块通过客户端传来的参数，在数据库中找到真实的路径返回文件流或错误码给客户端</p>
+</li>
+<li><p>参数说明:</p>
+<pre><code>  URL：/download/
+  类型: POST/GET
+  参数：
+      path：      base64的目标路径，同upload的规范    必须
+      filemd5:    文件的md5值                       非必须
+      lang:       返回码信息的语言  非必须
+      params:     传递给插件的参数  非必须
+  返回值：
+      正常情况下返回文件流
+      错误的情况下返回错误的信息，同上传的JSON信息结构
+  具体说明：
+      1. 当path和filemd5同时存在时，只使用md5值去寻找文件，path不使用
+      2. path同样需要base64编码，格式和upload中的path一致
+      3. lang和params与upload中用法一致
+      4. 可以使用GET的参数形式访问
+
+  curl实例:
+      (path=WAF/5.0/192.168.55.2-AAAA-BBBB-CCCC-DDDD/192.168.1.1_waflog_0530.zip)
+
+      curl -F path=V0FGLzUuMC8xOTIuMTY4LjU1LjItQUFBQS1CQkJCLUNDQ0MtRERERC8xOTIuMTY4LjEuMV93YWZsb2dfMDUzMC56aXAK -F filemd5=189e725f4587b679740f0f7783745056 -F lang=en -F params=download_log xxx.xxx.xxx.xxx/download/</code></pre>
+</li>
+</ul>
+<h5>查询模块</h5>
+<ul>
+<li><p>通过文件的目标路径或文件md5确定文件是否存在</p>
+</li>
+<li><p>参数说明</p>
+<pre><code>  URL: /search/isexist/
+  类型: POST/GET
+  参数:
+      path：      base64的目标路径，同upload的规范    必须
+      filemd5:    文件的md5值                       非必须
+      lang:       返回码信息的语言  非必须
+      params:     传递给插件的参数  非必须
+  返回值:
+
+      JSON格式的返回信息：
+          {
+              result: (返回码),
+              msgs:   (返回信息),
+              filemd5:(文件md5，如果没有找到则为空)
+          }
+  具体说明:
+      1. 当path和filemd5同时存在时，只使用md5值去寻找文件，path不使用
+      2. path同样需要base64编码，格式和upload中的path一致
+      3. lang和params与upload中用法一致
+      4. 可以使用GET的参数形式访问
+
+   curl实例:
+      (path=WAF/5.0/192.168.55.2-AAAA-BBBB-CCCC-DDDD/192.168.1.1_waflog_0530.zip)
+
+      curl -F path=V0FGLzUuMC8xOTIuMTY4LjU1LjItQUFBQS1CQkJCLUNDQ0MtRERERC8xOTIuMTY4LjEuMV93YWZsb2dfMDUzMC56aXAK -F filemd5=189e725f4587b679740f0f7783745056 -F lang=en -F params=download_log xxx.xxx.xxx.xxx/search/isexist/</code></pre>
+</li>
+</ul>
+<h5>错误码解释</h5>
+<pre><code>    ERRORS = { 
+        'en': {
+            '1000': 'normal',
+            '1001': 'file size exceeds limit',
+            '1002': 'file is not exist',
+            '1003': 'file path error',
+            '1004': 'file md5 error',
+            '1005': 'language error',
+            '1006': 'request method error, must be POST',
+            '1007': 'file ext not allow',
+            '1008': 'upload form insufficient parameters',
+            '1404': 'unknown error',
+            },  
+        'cn': {
+            '1000': '正常返回值',
+            '1001': '文件大小超过上限',
+            '1002': '文件不存在',
+            '1003': '文件目标路径错误',
+            '1004': '文件MD5值不一致',
+            '1005': '返回值语言不存在',
+            '1006': '请求类型错误，必须是POST',
+            '1007': '文件类型不允许',
+            '1008': '上传文件参数不足',
+            '1404': '未知错误',
+            }   
+    }</code></pre>
+<h5>插件编写</h5>
+<ul>
+<li>在plugins文件夹下有upload、download两个文件夹，分别放着上传和下载使用的插件</li>
+<li>插件的命名方式:upload_plugin_xxxxx.py 或 download_plugin_xxxx.py分别放在对应的文件夹下面</li>
+<li>插件需要实现is_run()函数判断此插件需要执行否，判断条件尽量严谨，避免误判断</li>
+<li>插件需要实现run()函数进行插件的逻辑处理函数</li>
+<li>上传插件返回无返回值</li>
+<li>下载插件无返回值时，系统自动根据参数寻找文件，返回路径时，系统根据插件返回的路径直接找文件返回</li>
+</ul>
+<h5>部署说明（runserver形式）</h5>
+<ul>
+<li><p>需要安装包: Python-2.6/2.7 Django-1.4/1.5 MySQLdb-1.2.2/1.2.3</p>
+</li>
+<li><p>具体配置：</p>
+<ol>
+<li>在settings中配置数据库</li>
+<li>MEDIA_ROOT为FileServer文件上传的根目录</li>
+<li>如果需要使用插件，需要在config/globalconf.py中添加插件文件名在INSTALL_UPLOAD_PLUGINS或INSTALL_DOWNLOAD_PLUGINS中</li>
+<li>配置允许的文件大小和路径等信息，都在config/globalconf.py中</li>
+</ol>
+</li>
+</ul>
+<h5>FAQ</h5>
+<ol>
+<li><p>上传插件怎么不执行？</p>
+<ul>
+<li>查看在文件是否放在upload或download文件夹下。</li>
+<li>查看插件的文件名称（比如test.py 插件名称为test）是否写入了config/globalconf.py的INSTALL_DOWNLOAD_PLUGINS或INSTALL_UPLOAD_PLUGINS中</li>
+<li>查看is_run()函数的判断参数是否正确</li>
+</ul>
+</li>
+<li><p>下载插件怎么不返回文件流?</p>
+<ul>
+<li>查看是否把要下载的文件后缀名在ALLOW_FILE_EXTS中写入</li>
+<li>查看是否把自定义路径放入ALLOW_SAVE_PATHS中</li>
+<li>查看文件的大小是否超过了MAX_FILE_SIZE</li>
+</ul>
+</li>
+</ol>
+<hr>
+<p>lxstar01@gmail.com
+2014-06-03
+
+
+
+
+
+
+
+
+</p>
+<p>Edit By <a href="http://mahua.jser.me">MaHua</a></p>
+</body></html>
